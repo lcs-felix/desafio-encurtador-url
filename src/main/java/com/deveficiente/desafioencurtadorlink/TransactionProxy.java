@@ -13,4 +13,11 @@ public class TransactionProxy {
 	public void executeInNewTransaction(Runnable runnable) {
 		runnable.run();
 	}
+
+	@Transactional(value = TxType.NEVER)
+	public void executeInNewTransactionMandatory(Runnable runnable) {
+		System.out.println("=============>  aqui");
+		runnable.run();
+	}
+
 }

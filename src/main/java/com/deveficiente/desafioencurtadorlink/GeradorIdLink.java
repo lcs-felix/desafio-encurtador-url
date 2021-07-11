@@ -26,18 +26,31 @@ public class GeradorIdLink {
 		this.transactionProxy = transactionProxy;
 	}
 
+	public String nextIdMandatory() {
+		String idLink = RandomStringUtils.randomAlphanumeric(6);
+		transactionProxy.executeInNewTransactionMandatory(() -> {
+			manager.persist(new IdGerado(idLink));
+		});
+		return idLink;
+	}
+
 	public String nextId() {
 
 		try {
 			String idLink = RandomStringUtils.randomAlphanumeric(6);
 			transactionProxy.executeInNewTransaction(() -> {
-				manager.persist(new IdGerado(idLink));				
+				manager.persist(new IdGerado(idLink));
 			});
+
+			if(true) {
+				throw new DataIntegrityViolationException("blah");
+			}
+
 			return idLink;
 		} catch (DataIntegrityViolationException exception) {
 			log.info("[IdDuplicado] Tentando gerar um novo id para links. A tentativa anterior deu errado",exception);
 			//aqui eu poderia ter uma política de retry. Preciso? Será que vou ficar em loop infinito?
-			return nextId();
+			return nextIdMandatory();
 		}
 	}
 }
